@@ -44,8 +44,13 @@ jspm_packages/
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
-# TypeScript cache
+# TypeScript cache / build output
 *.tsbuildinfo
+*.d.ts
+!app/src/vite-env.d.ts
+app/vite.config.js
+app/vitest.config.js
+data/dist/
 
 # Optional npm cache directory
 .npm
