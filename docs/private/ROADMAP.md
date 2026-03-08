@@ -1,18 +1,22 @@
 # Roadmap Farmakit
 
-## Fase 0 — Setup (attuale)
+## Fase 0 — Setup ✅
 - [x] Struttura monorepo
 - [x] Configurazione build e test
 - [x] Schema database
 - [x] Documentazione spec-driven
 - [x] OpenAPI spec
 
-## Fase 1 — MVP Core
-- [ ] Autenticazione (login/signup email)
-- [ ] CRUD armadietti
-- [ ] Aggiunta farmaci manuale (nome custom)
-- [ ] Lista farmaci con scadenze
-- [ ] Layout mobile-first (BottomNav, PageLayout)
+## Fase 1 — MVP Core ✅
+- [x] Progetto Supabase (farmakit, eu-west-1)
+- [x] Migrazione schema DB applicata
+- [x] Autenticazione (login/signup email)
+- [x] CRUD armadietti (crea, modifica, elimina)
+- [x] Aggiunta farmaci manuale (nome custom, quantità, scadenza, note)
+- [x] Lista farmaci con scadenze e badge stato (scaduto, in scadenza)
+- [x] Layout mobile-first (BottomNav, Header, PageLayout, AppShell)
+- [x] Componenti shadcn/ui (button, input, label, card, dialog, badge, separator, tabs, sonner)
+- [x] Test CRUD cabinets e medicines (30 test)
 - [ ] Deploy su Netlify
 
 ## Fase 2 — Barcode + Catalogo

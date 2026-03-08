@@ -21,10 +21,28 @@ export async function getCabinets(): Promise<CabinetWithRole[]> {
   });
 }
 
-export async function createCabinet(name: string, icon?: string): Promise<Cabinet> {
+export async function updateCabinet(
+  id: string,
+  updates: { name?: string; icon?: string },
+): Promise<Cabinet> {
   const { data, error } = await supabase
     .from("cabinets")
-    .insert({ name, icon })
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function createCabinet(name: string, icon?: string): Promise<Cabinet> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non autenticato");
+
+  const { data, error } = await supabase
+    .from("cabinets")
+    .insert({ name, icon, owner_id: user.id })
     .select()
     .single();
 

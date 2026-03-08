@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserMedicines, addUserMedicine, deleteUserMedicine } from "@/lib/medicines";
-import type { MedicineFormData } from "@/types/medicine";
 
 export function useMedicines(cabinetId: string | null) {
   const queryClient = useQueryClient();
@@ -11,18 +10,17 @@ export function useMedicines(cabinetId: string | null) {
     enabled: !!cabinetId,
   });
 
+  const invalidateMedicines = () =>
+    queryClient.invalidateQueries({ queryKey: ["user-medicines", cabinetId] });
+
   const addMutation = useMutation({
-    mutationFn: (data: MedicineFormData) => addUserMedicine(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-medicines", cabinetId] });
-    },
+    mutationFn: addUserMedicine,
+    onSuccess: invalidateMedicines,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteUserMedicine(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-medicines", cabinetId] });
-    },
+    mutationFn: deleteUserMedicine,
+    onSuccess: invalidateMedicines,
   });
 
   return {

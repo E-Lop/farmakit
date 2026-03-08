@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getCabinets, createCabinet, deleteCabinet } from "@/lib/cabinets";
+import {
+  getCabinets,
+  createCabinet,
+  updateCabinet,
+  deleteCabinet,
+} from "@/lib/cabinets";
 
 export function useCabinets() {
   const queryClient = useQueryClient();
@@ -9,19 +14,29 @@ export function useCabinets() {
     queryFn: getCabinets,
   });
 
+  const invalidateCabinets = () =>
+    queryClient.invalidateQueries({ queryKey: ["cabinets"] });
+
   const createMutation = useMutation({
     mutationFn: ({ name, icon }: { name: string; icon?: string }) =>
       createCabinet(name, icon),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cabinets"] });
-    },
+    onSuccess: invalidateCabinets,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: { name?: string; icon?: string };
+    }) => updateCabinet(id, updates),
+    onSuccess: invalidateCabinets,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteCabinet(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cabinets"] });
-    },
+    mutationFn: deleteCabinet,
+    onSuccess: invalidateCabinets,
   });
 
   return {
@@ -29,6 +44,7 @@ export function useCabinets() {
     isLoading: query.isLoading,
     error: query.error,
     createCabinet: createMutation.mutateAsync,
+    updateCabinet: updateMutation.mutateAsync,
     deleteCabinet: deleteMutation.mutateAsync,
   };
 }

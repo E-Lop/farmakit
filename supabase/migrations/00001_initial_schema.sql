@@ -176,6 +176,13 @@ create policy "Membri vedono i propri armadietti"
   to authenticated
   using (is_cabinet_member(id, auth.uid()));
 
+-- L'owner vede i propri armadietti anche prima che il trigger
+-- aggiunga il record in cabinet_members (necessario per INSERT...RETURNING)
+create policy "Owner vede i propri armadietti"
+  on cabinets for select
+  to authenticated
+  using (owner_id = auth.uid());
+
 create policy "Utenti autenticati creano armadietti"
   on cabinets for insert
   to authenticated
