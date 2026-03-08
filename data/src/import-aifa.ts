@@ -1,23 +1,40 @@
 import { readFileSync } from "fs";
 import { createClient } from "@supabase/supabase-js";
 import { parseCsv } from "./parsers/csv-parser";
-import { normalizeAifaRecord } from "./parsers/normalizer";
+import { normalizeAifaRecord, isAuthorized } from "./parsers/normalizer";
 import { AifaRecordSchema, type ImportResult } from "./types/aifa.types";
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-async function importAifa(filePath: string): Promise<ImportResult> {
+const AIFA_CSV_URL = "https://drive.aifa.gov.it/farmaci/confezioni.csv";
+const BATCH_SIZE = 500;
+
+async function fetchCsv(source: string): Promise<string> {
+  if (source.startsWith("http")) {
+    console.log(`Scaricamento da ${source}...`);
+    const response = await fetch(source);
+    if (!response.ok) throw new Error(`Download fallito: ${response.status}`);
+    return response.text();
+  }
+  return readFileSync(source, "utf-8");
+}
+
+async function importAifa(source: string): Promise<ImportResult> {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-  const content = readFileSync(filePath, "utf-8");
+  const content = await fetchCsv(source);
   const rows = parseCsv<Record<string, string>>(content);
 
   const result: ImportResult = { total: rows.length, imported: 0, skipped: 0, errors: [] };
 
-  const BATCH_SIZE = 500;
   const validRecords = [];
 
   for (let i = 0; i < rows.length; i++) {
+    if (!isAuthorized(rows[i])) {
+      result.skipped++;
+      continue;
+    }
+
     const normalized = normalizeAifaRecord(rows[i]);
     const parsed = AifaRecordSchema.safeParse(normalized);
     if (parsed.success) {
@@ -27,6 +44,8 @@ async function importAifa(filePath: string): Promise<ImportResult> {
       result.skipped++;
     }
   }
+
+  console.log(`Record validi: ${validRecords.length}/${rows.length}`);
 
   for (let i = 0; i < validRecords.length; i += BATCH_SIZE) {
     const batch = validRecords.slice(i, i + BATCH_SIZE);
@@ -44,12 +63,8 @@ async function importAifa(filePath: string): Promise<ImportResult> {
   return result;
 }
 
-const filePath = process.argv[2];
-if (!filePath) {
-  console.error("Utilizzo: npm run import:aifa -- <percorso-file-csv>");
-  process.exit(1);
-}
+const source = process.argv[2] || AIFA_CSV_URL;
 
-importAifa(filePath).then((result) => {
+importAifa(source).then((result) => {
   console.log("Import completato:", result);
 });

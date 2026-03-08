@@ -52,6 +52,10 @@ components:
         package_description:
           type: string
           nullable: true
+        pharmaceutical_form:
+          type: string
+          nullable: true
+          description: Forma farmaceutica (es. Compressa, Sciroppo, Gocce)
         barcode:
           type: string
           nullable: true
