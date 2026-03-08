@@ -14,11 +14,13 @@ import { Header } from "@/components/layout/Header";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import type { Cabinet } from "@/types/cabinet";
 import type { UserMedicine } from "@/types/medicine";
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const cabinetId = searchParams.get("cabinet");
 
   const { cabinets, isLoading: cabinetsLoading } = useCabinets();
@@ -32,10 +34,14 @@ export function Dashboard() {
 
   const isLoading = cabinetsLoading || medsLoading;
 
+  const handleSelectCabinet = (id: string) => {
+    setSearchParams({ cabinet: id });
+  };
+
   return (
     <>
       <Header
-        title={activeCabinet?.name ?? "Farmakit"}
+        title="Farmakit"
         action={
           activeCabinet && (
             <Button
@@ -53,6 +59,14 @@ export function Dashboard() {
       />
 
       <PageLayout>
+        {cabinets.length > 1 && (
+          <CabinetTabs
+            cabinets={cabinets}
+            activeId={activeCabinet?.id ?? null}
+            onSelect={handleSelectCabinet}
+          />
+        )}
+
         <DashboardContent
           isLoading={isLoading}
           cabinets={cabinets}
@@ -62,6 +76,42 @@ export function Dashboard() {
         />
       </PageLayout>
     </>
+  );
+}
+
+function CabinetTabs({
+  cabinets,
+  activeId,
+  onSelect,
+}: {
+  cabinets: Cabinet[];
+  activeId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div className="-mx-4 mb-3 overflow-x-auto px-4">
+      <div className="flex gap-2">
+        {cabinets.map((cab) => {
+          const isActive = cab.id === activeId;
+          return (
+            <button
+              key={cab.id}
+              type="button"
+              onClick={() => onSelect(cab.id)}
+              className={cn(
+                "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                isActive
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {cab.icon && <span className="mr-1.5">{cab.icon}</span>}
+              {cab.name}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

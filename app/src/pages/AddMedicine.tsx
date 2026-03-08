@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { useCabinets } from "@/hooks/useCabinets";
 import { useMedicines } from "@/hooks/useMedicines";
 import { MedicineSearch } from "@/components/medicines/MedicineSearch";
 import { Header } from "@/components/layout/Header";
@@ -43,12 +44,27 @@ const COMMON_FORMS = [
 export function AddMedicine() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const cabinetId = searchParams.get("cabinet");
+  const cabinetParam = searchParams.get("cabinet");
   const prefillMedicineId = searchParams.get("medicineId");
   const prefillName = searchParams.get("name") ?? "";
   const prefillBarcode = searchParams.get("barcode") ?? "";
 
-  const { addMedicine } = useMedicines(cabinetId);
+  const { cabinets, isLoading: cabinetsLoading } = useCabinets();
+
+  const [selectedCabinetId, setSelectedCabinetId] = useState(cabinetParam ?? "");
+
+  // Se il param non corrisponde a nessun armadietto, usa il primo disponibile
+  const activeCabinetId =
+    cabinets.find((c) => c.id === selectedCabinetId)?.id ??
+    cabinets[0]?.id ??
+    null;
+
+  // Sincronizza quando i cabinets arrivano e non c'era un param valido
+  if (activeCabinetId && !selectedCabinetId && cabinets.length > 0) {
+    setSelectedCabinetId(activeCabinetId);
+  }
+
+  const { addMedicine } = useMedicines(activeCabinetId);
 
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
   const [customName, setCustomName] = useState(prefillMedicineId ? "" : prefillName);
@@ -77,13 +93,13 @@ export function AddMedicine() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cabinetId) return;
+    if (!activeCabinetId) return;
     if (!selectedMedicine && !customName.trim() && !prefillMedicineId) return;
 
     setSubmitting(true);
     try {
       await addMedicine({
-        cabinet_id: cabinetId,
+        cabinet_id: activeCabinetId,
         medicine_id: selectedMedicine?.id ?? prefillMedicineId ?? undefined,
         custom_name: selectedMedicine || prefillMedicineId ? undefined : customName.trim(),
         pharmaceutical_form: pharmaceuticalForm || undefined,
@@ -103,13 +119,28 @@ export function AddMedicine() {
     }
   };
 
-  if (!cabinetId) {
+  if (cabinetsLoading) {
+    return (
+      <>
+        <Header title="Aggiungi farmaco" showBack />
+        <PageLayout>
+          <div className="flex flex-col gap-3 pt-4">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-10 animate-pulse rounded-xl bg-muted" />
+            ))}
+          </div>
+        </PageLayout>
+      </>
+    );
+  }
+
+  if (cabinets.length === 0) {
     return (
       <>
         <Header title="Aggiungi farmaco" showBack />
         <PageLayout>
           <p className="pt-8 text-center text-sm text-muted-foreground">
-            Seleziona prima un armadietto.
+            Crea prima un armadietto.
           </p>
         </PageLayout>
       </>
@@ -117,13 +148,38 @@ export function AddMedicine() {
   }
 
   const canSubmit =
-    !!selectedMedicine || !!customName.trim() || !!prefillMedicineId;
+    !!activeCabinetId &&
+    (!!selectedMedicine || !!customName.trim() || !!prefillMedicineId);
 
   return (
     <>
       <Header title="Aggiungi farmaco" showBack />
       <PageLayout>
         <form onSubmit={handleSubmit} className="space-y-5 pt-2 animate-fade-in">
+          {/* Selettore armadietto */}
+          <div className="space-y-2">
+            <Label htmlFor="cabinet">Armadietto</Label>
+            {cabinets.length === 1 ? (
+              <div className="flex h-9 items-center rounded-md border border-input bg-muted/50 px-3 text-sm">
+                {cabinets[0].icon && <span className="mr-2">{cabinets[0].icon}</span>}
+                {cabinets[0].name}
+              </div>
+            ) : (
+              <select
+                id="cabinet"
+                value={activeCabinetId ?? ""}
+                onChange={(e) => setSelectedCabinetId(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                {cabinets.map((cab) => (
+                  <option key={cab.id} value={cab.id}>
+                    {cab.icon ? `${cab.icon} ` : ""}{cab.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
           {prefilledFromScan && prefillName ? (
             <div className="space-y-2">
               <Label>Farmaco dal catalogo</Label>
