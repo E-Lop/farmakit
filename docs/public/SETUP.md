@@ -11,7 +11,7 @@ Guida completa per configurare l'ambiente di sviluppo locale.
 ## Installazione
 
 ```bash
-git clone https://github.com/your-org/farmakit.git
+git clone https://github.com/E-Lop/farmakit.git
 cd farmakit
 npm install
 ```

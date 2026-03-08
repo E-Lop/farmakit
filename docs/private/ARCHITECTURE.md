@@ -143,3 +143,18 @@ src/
 | idb-keyval vs Dexie | Semplicità per key-value, sufficiente per il nostro uso |
 | shadcn/ui vs MUI | Bundle size, customizzazione Tailwind, copy-paste ownership |
 | Vite vs Next.js | SPA pura, no SSR necessario, build veloce |
+| Netlify vs Vercel | Supporto monorepo, redirect SPA semplici, pricing gratuito generoso |
+
+## Deploy
+
+L'app è deployata su **Netlify** con dominio custom.
+
+- **URL produzione**: https://farmakit.it
+- **URL Netlify**: https://farmakit-app.netlify.app
+- **Dominio**: `farmakit.it` (registrato su Aruba, DNS puntato a Netlify)
+- **Configurazione**: `netlify.toml` nella root del monorepo
+- **Build command**: `npm run build` (esegue il build del workspace `app`)
+- **Publish directory**: `app/dist`
+- **Redirect SPA**: `/* → /index.html` (status 200)
+- **Variabili d'ambiente**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` configurate su Netlify
+- **SSL**: certificato automatico Let's Encrypt via Netlify

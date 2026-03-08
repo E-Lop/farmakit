@@ -42,6 +42,14 @@ Farmakit è una PWA mobile-first per gestire l'inventario farmaci domestici (sca
 - Accesso dati basato su `cabinet_members` (condivisione selettiva)
 - Tabelle principali: `medicines`, `cabinets`, `cabinet_members`, `user_medicines`, `community_contributions`
 
+## Deploy
+- **Hosting**: Netlify (sito: `farmakit-app`)
+- **URL produzione**: https://farmakit.it (dominio custom, DNS su Aruba)
+- **URL Netlify**: https://farmakit-app.netlify.app
+- **Netlify CLI + monorepo**: usare sempre `--filter @farmakit/app` per evitare il prompt interattivo di selezione progetto (es. `netlify deploy --filter @farmakit/app`)
+- **Config**: `netlify.toml` nella root (build command, publish dir, redirects SPA, header sw.js)
+- **Env vars**: `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` configurate su Netlify
+
 ## Comandi utili
 ```bash
 npm run dev          # Dev server (app)
@@ -50,6 +58,10 @@ npm run typecheck    # Type check tutti i workspace
 npm run lint         # ESLint
 npm test             # Vitest (tutti i workspace)
 ```
+
+## Workflow sviluppo
+- **Test-driven**: scrivere i test prima del codice, ove applicabile
+- **Code simplifier**: al termine dell'implementazione di ogni nuova feature, lanciare automaticamente il code simplifier per rifinire il codice (chiarezza, consistenza, manutenibilità)
 
 ## Lingua
 Documentazione e commenti in italiano. Codice (variabili, funzioni, tipi) in inglese.

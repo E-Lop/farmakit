@@ -17,7 +17,8 @@
 - [x] Layout mobile-first (BottomNav, Header, PageLayout, AppShell)
 - [x] Componenti shadcn/ui (button, input, label, card, dialog, badge, separator, tabs, sonner)
 - [x] Test CRUD cabinets e medicines (30 test)
-- [ ] Deploy su Netlify
+- [x] Deploy su Netlify (farmakit-app.netlify.app)
+- [x] Dominio custom farmakit.it (DNS su Aruba)
 
 ## Fase 2 — Barcode + Catalogo
 - [ ] Scanner barcode con @zxing
