@@ -22,6 +22,8 @@ export interface UserMedicine {
   expiry_date: string | null;
   notes: string | null;
   barcode: string | null;
+  pharmaceutical_form: string | null;
+  strength: string | null;
   notify_before_days: number;
   created_at: string;
   updated_at: string;
@@ -36,5 +38,7 @@ export interface MedicineFormData {
   expiry_date?: string;
   notes?: string;
   barcode?: string;
+  pharmaceutical_form?: string;
+  strength?: string;
   notify_before_days: number;
 }

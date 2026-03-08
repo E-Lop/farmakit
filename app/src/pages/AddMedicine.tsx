@@ -10,6 +10,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Medicine } from "@/types/medicine";
 
+// Forme farmaceutiche più comuni per uso domestico (coerenti con catalogo AIFA)
+const COMMON_FORMS = [
+  "Compressa",
+  "Compressa rivestita con film",
+  "Compressa effervescente",
+  "Compressa orodispersibile",
+  "Compressa masticabile",
+  "Compressa a rilascio prolungato",
+  "Capsula rigida",
+  "Capsula molle",
+  "Capsula rigida gastroresistente",
+  "Bustina",
+  "Granulato",
+  "Granulato effervescente",
+  "Sciroppo",
+  "Soluzione orale",
+  "Gocce orali, soluzione",
+  "Sospensione orale",
+  "Supposta",
+  "Crema",
+  "Gel",
+  "Pomata",
+  "Cerotto transdermico",
+  "Spray",
+  "Spray nasale",
+  "Collirio, soluzione",
+  "Pastiglia",
+  "Soluzione iniettabile",
+];
+
 export function AddMedicine() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -22,6 +52,8 @@ export function AddMedicine() {
 
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
   const [customName, setCustomName] = useState(prefillMedicineId ? "" : prefillName);
+  const [pharmaceuticalForm, setPharmaceuticalForm] = useState("");
+  const [strength, setStrength] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [expiryDate, setExpiryDate] = useState("");
   const [notes, setNotes] = useState("");
@@ -54,6 +86,8 @@ export function AddMedicine() {
         cabinet_id: cabinetId,
         medicine_id: selectedMedicine?.id ?? prefillMedicineId ?? undefined,
         custom_name: selectedMedicine || prefillMedicineId ? undefined : customName.trim(),
+        pharmaceutical_form: pharmaceuticalForm || undefined,
+        strength: strength.trim() || undefined,
         quantity: parseInt(quantity, 10) || 1,
         expiry_date: expiryDate || undefined,
         notes: notes.trim() || undefined,
@@ -127,6 +161,33 @@ export function AddMedicine() {
               )}
             </div>
           )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="form">Forma farmaceutica</Label>
+              <Input
+                id="form"
+                list="form-suggestions"
+                placeholder="Es. Compressa"
+                value={pharmaceuticalForm}
+                onChange={(e) => setPharmaceuticalForm(e.target.value)}
+              />
+              <datalist id="form-suggestions">
+                {COMMON_FORMS.map((form) => (
+                  <option key={form} value={form} />
+                ))}
+              </datalist>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="strength">Dosaggio</Label>
+              <Input
+                id="strength"
+                placeholder="Es. 600 mg"
+                value={strength}
+                onChange={(e) => setStrength(e.target.value)}
+              />
+            </div>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

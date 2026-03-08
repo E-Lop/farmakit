@@ -42,6 +42,8 @@ const fakeUserMedicine: UserMedicine = {
   expiry_date: "2027-06-15",
   notes: null,
   barcode: null,
+  pharmaceutical_form: null,
+  strength: null,
   notify_before_days: 30,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
