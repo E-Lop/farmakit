@@ -1,0 +1,482 @@
+openapi: 3.1.0
+info:
+  title: Farmakit API
+  version: 0.1.0
+  description: |
+    API pubblica di Farmakit — armadietto farmaci digitale.
+    Permette di cercare farmaci nel catalogo, gestire armadietti e inventario,
+    e contribuire al catalogo community.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://{project}.supabase.co
+    description: Supabase project
+    variables:
+      project:
+        default: your-project
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Medicine:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        aic_code:
+          type: string
+          nullable: true
+          description: Codice AIC univoco AIFA
+        name:
+          type: string
+        active_ingredient:
+          type: string
+          nullable: true
+        manufacturer:
+          type: string
+          nullable: true
+        atc_code:
+          type: string
+          nullable: true
+        package_description:
+          type: string
+          nullable: true
+        barcode:
+          type: string
+          nullable: true
+        source:
+          type: string
+          enum: [aifa, community]
+        verified:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, name, source, verified]
+
+    Cabinet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        icon:
+          type: string
+          nullable: true
+        owner_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, name, owner_id]
+
+    CabinetMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cabinet_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [owner, editor]
+        created_at:
+          type: string
+          format: date-time
+      required: [id, cabinet_id, user_id, role]
+
+    UserMedicine:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cabinet_id:
+          type: string
+          format: uuid
+        medicine_id:
+          type: string
+          format: uuid
+          nullable: true
+        custom_name:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+          minimum: 0
+        expiry_date:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        barcode:
+          type: string
+          nullable: true
+        notify_before_days:
+          type: integer
+          default: 30
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, cabinet_id, quantity]
+
+    CommunityContribution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        medicine_id:
+          type: string
+          format: uuid
+          nullable: true
+        contribution_type:
+          type: string
+          enum: [new_medicine, barcode_add, correction]
+        data:
+          type: object
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        created_at:
+          type: string
+          format: date-time
+      required: [id, user_id, contribution_type, status]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+paths:
+  /rest/v1/medicines:
+    get:
+      summary: Cerca farmaci nel catalogo
+      description: Ricerca full-text per nome, principio attivo o barcode
+      tags: [Catalogo]
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: Filtro per nome (ilike)
+        - name: barcode
+          in: query
+          schema:
+            type: string
+          description: Filtro per barcode (eq)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Lista farmaci trovati
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Medicine"
+
+  /rest/v1/cabinets:
+    get:
+      summary: Lista armadietti dell'utente
+      tags: [Armadietti]
+      responses:
+        "200":
+          description: Lista armadietti accessibili
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cabinet"
+    post:
+      summary: Crea un nuovo armadietto
+      tags: [Armadietti]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                icon:
+                  type: string
+              required: [name]
+      responses:
+        "201":
+          description: Armadietto creato
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cabinet"
+
+  /rest/v1/cabinets/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      summary: Modifica un armadietto
+      tags: [Armadietti]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                icon:
+                  type: string
+      responses:
+        "200":
+          description: Armadietto aggiornato
+    delete:
+      summary: Elimina un armadietto
+      tags: [Armadietti]
+      responses:
+        "204":
+          description: Armadietto eliminato
+
+  /rest/v1/cabinet_members:
+    get:
+      summary: Lista membri di un armadietto
+      tags: [Condivisione]
+      parameters:
+        - name: cabinet_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista membri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CabinetMember"
+    post:
+      summary: Aggiungi un membro all'armadietto
+      tags: [Condivisione]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cabinet_id:
+                  type: string
+                  format: uuid
+                user_id:
+                  type: string
+                  format: uuid
+                role:
+                  type: string
+                  enum: [editor]
+                  default: editor
+              required: [cabinet_id, user_id]
+      responses:
+        "201":
+          description: Membro aggiunto
+
+  /rest/v1/user_medicines:
+    get:
+      summary: Lista farmaci in un armadietto
+      tags: [Inventario]
+      parameters:
+        - name: cabinet_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista farmaci nell'armadietto
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserMedicine"
+    post:
+      summary: Aggiungi farmaco all'armadietto
+      tags: [Inventario]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cabinet_id:
+                  type: string
+                  format: uuid
+                medicine_id:
+                  type: string
+                  format: uuid
+                custom_name:
+                  type: string
+                quantity:
+                  type: integer
+                  default: 1
+                expiry_date:
+                  type: string
+                  format: date
+                notes:
+                  type: string
+                notify_before_days:
+                  type: integer
+                  default: 30
+              required: [cabinet_id]
+      responses:
+        "201":
+          description: Farmaco aggiunto
+
+  /rest/v1/user_medicines/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      summary: Modifica farmaco nell'armadietto
+      tags: [Inventario]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                expiry_date:
+                  type: string
+                  format: date
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Farmaco aggiornato
+    delete:
+      summary: Rimuovi farmaco dall'armadietto
+      tags: [Inventario]
+      responses:
+        "204":
+          description: Farmaco rimosso
+
+  /functions/v1/medicine-lookup:
+    post:
+      summary: Lookup farmaco per barcode o testo
+      tags: [Edge Functions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                barcode:
+                  type: string
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Farmaco trovato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Medicine"
+
+  /functions/v1/submit-contribution:
+    post:
+      summary: Invia contribuzione al catalogo community
+      tags: [Edge Functions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contribution_type:
+                  type: string
+                  enum: [new_medicine, barcode_add, correction]
+                data:
+                  type: object
+              required: [contribution_type, data]
+      responses:
+        "200":
+          description: Contribuzione registrata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/CommunityContribution"
+
+tags:
+  - name: Catalogo
+    description: Ricerca farmaci nel catalogo AIFA + community
+  - name: Armadietti
+    description: Gestione armadietti/liste dell'utente
+  - name: Condivisione
+    description: Condivisione selettiva degli armadietti
+  - name: Inventario
+    description: Gestione farmaci nell'armadietto
+  - name: Edge Functions
+    description: Funzioni serverless custom

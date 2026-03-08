@@ -1,0 +1,34 @@
+{
+  "name": "farmakit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Armadietto farmaci digitale — PWA per gestire scadenze e scorte dei farmaci domestici",
+  "workspaces": [
+    "app",
+    "api",
+    "data"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w app",
+    "build": "npm run build -w app",
+    "preview": "npm run preview -w app",
+    "typecheck": "tsc --build",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "globals": "^15.15.0",
+    "typescript-eslint": "^8.56.1"
+  }
+}
