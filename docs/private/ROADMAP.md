@@ -20,37 +20,40 @@
 - [x] Deploy su Netlify (farmakit-app.netlify.app)
 - [x] Dominio custom farmakit.it (DNS su Aruba)
 
-## Fase 2 — Barcode + Catalogo
-- [ ] Scanner barcode con @zxing
-- [ ] Import dataset AIFA
-- [ ] Lookup farmaco da barcode
-- [ ] Ricerca farmaco per nome/principio attivo
-- [ ] Associazione farmaco catalogo ↔ inventario
+## Fase 2 — Barcode + Catalogo ✅
+- [x] Scanner barcode con @zxing (allineato a EntroApp: fix iOS, cleanup stream, torch toggle)
+- [x] Import dataset AIFA (158.066 farmaci autorizzati caricati in DB)
+- [x] Lookup farmaco da barcode (pagina Scan completa con camera + input manuale)
+- [x] Ricerca farmaco per nome/principio attivo (componente MedicineSearch con debounce)
+- [x] Associazione farmaco catalogo ↔ inventario (pre-fill AddMedicine da catalogo/scan)
+- [x] Test hooks barcode e lookup (42 test totali)
 
 ## Fase 3 — Offline + PWA
-- [ ] Service Worker con vite-plugin-pwa
-- [ ] Cache catalogo farmaci in IndexedDB
-- [ ] Mutation queue per operazioni offline
-- [ ] Sync bidirezionale online/offline
+- [ ] Service Worker con VitePWA (injectManifest, Workbox) — _da EntroApp: sw.ts, vite.config.ts_
+- [ ] Cache catalogo farmaci in IndexedDB — _da EntroApp: queryPersister.ts_
+- [ ] Mutation queue per operazioni offline — _da EntroApp: mutationDefaults.ts_
+- [ ] Sync bidirezionale online/offline — _da EntroApp: realtime.ts_
 - [ ] Install prompt e update banner
 
 ## Fase 4 — Condivisione
-- [ ] Invito membri per email
+- [ ] Invito membri con short code — _da EntroApp: invites.ts, Edge Function_
 - [ ] Gestione ruoli (owner/editor)
-- [ ] Vista membri armadietto
-- [ ] Rimozione membri
+- [ ] Vista membri armadietto — _da EntroApp: sharing/ components_
+- [ ] Rimozione membri e uscita da armadietto condiviso
 
 ## Fase 5 — Notifiche + Community
 - [ ] Notifiche scadenza farmaci (in-app)
-- [ ] Edge Function per notifiche push
+- [ ] Push notifications (VAPID + Web Push) — _da EntroApp: pushNotifications.ts, sw.ts push handler_
+- [ ] Preferenze notifiche (quiet hours, intervalli) — _da EntroApp: useNotificationPreferences.ts_
 - [ ] Contribuzioni community (nuovo farmaco, barcode, correzione)
-- [ ] Moderazione contribuzioni (admin)
+- [ ] Moderazione contribuzioni (admin) — _da costruire ex novo_
 
 ## Fase 6 — Polish
-- [ ] Onboarding primo utilizzo
-- [ ] Tema scuro
+- [ ] Onboarding primo utilizzo — _da EntroApp: GuidaPage.tsx, InstructionCard.tsx_
+- [ ] Tema scuro — _da EntroApp: useTheme.ts_
 - [ ] Statistiche (farmaci totali, in scadenza, per armadietto)
-- [ ] Export dati
+- [ ] Export dati (GDPR) — _da EntroApp: dataExport.ts_
+- [ ] Haptics — _da EntroApp: haptics.ts_
 - [ ] Accessibilità (a11y audit)
 
 ## Futuro
