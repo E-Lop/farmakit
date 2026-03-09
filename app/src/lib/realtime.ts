@@ -1,5 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { medicineKeys, cabinetKeys } from "./queryKeys";
 
 // --- Deduplication tracker ---
 
@@ -8,20 +9,24 @@ const DEDUP_WINDOW_MS = 10_000;
 interface TrackedMutation {
   type: string;
   timestamp: number;
+  timerId: ReturnType<typeof setTimeout>;
 }
 
 export class RecentMutationsTracker {
   private mutations = new Map<string, TrackedMutation>();
 
   track(id: string, type: string): void {
-    this.mutations.set(id, { type, timestamp: Date.now() });
-    setTimeout(() => this.mutations.delete(id), DEDUP_WINDOW_MS);
+    const existing = this.mutations.get(id);
+    if (existing) clearTimeout(existing.timerId);
+    const timerId = setTimeout(() => this.mutations.delete(id), DEDUP_WINDOW_MS);
+    this.mutations.set(id, { type, timestamp: Date.now(), timerId });
   }
 
   wasRecentlyMutated(id: string, type: string): boolean {
     const entry = this.mutations.get(id);
     if (!entry) return false;
     if (Date.now() - entry.timestamp > DEDUP_WINDOW_MS) {
+      clearTimeout(entry.timerId);
       this.mutations.delete(id);
       return false;
     }
@@ -30,13 +35,6 @@ export class RecentMutationsTracker {
 }
 
 export const mutationTracker = new RecentMutationsTracker();
-
-// --- Query keys ---
-
-export const medicineKeys = {
-  lists: () => ["user-medicines"] as const,
-  list: (cabinetId: string) => ["user-medicines", cabinetId] as const,
-};
 
 // --- Realtime payload types ---
 
@@ -59,94 +57,61 @@ interface CabinetMemberRow {
   [key: string]: unknown;
 }
 
-// --- User medicines handlers ---
-
-export function handleMedicineInsert(
-  _payload: RealtimePayload<UserMedicineRow>,
-  queryClient: QueryClient,
-): void {
-  queryClient.invalidateQueries({ queryKey: medicineKeys.lists() });
-}
-
-export function handleMedicineUpdate(
-  payload: RealtimePayload<UserMedicineRow>,
-  queryClient: QueryClient,
-): void {
-  const updated = payload.new;
-  if (mutationTracker.wasRecentlyMutated(updated.id, "UPDATE")) return;
-  queryClient.invalidateQueries({ queryKey: medicineKeys.lists() });
-}
-
-export function handleMedicineDelete(
-  payload: RealtimePayload<UserMedicineRow>,
-  queryClient: QueryClient,
-): void {
-  const deleted = payload.old;
-  if (deleted.id && mutationTracker.wasRecentlyMutated(deleted.id, "DELETE")) return;
-  queryClient.invalidateQueries({ queryKey: medicineKeys.lists() });
-  const name = deleted.custom_name || "Un farmaco";
-  toast.info(`${name} è stato eliminato da un altro utente`);
-}
+// --- User medicines handler ---
 
 export function handleMedicineRealtimeEvent(
   payload: RealtimePayload<UserMedicineRow>,
   queryClient: QueryClient,
 ): void {
-  switch (payload.eventType) {
-    case "INSERT":
-      handleMedicineInsert(payload, queryClient);
-      break;
-    case "UPDATE":
-      handleMedicineUpdate(payload, queryClient);
-      break;
-    case "DELETE":
-      handleMedicineDelete(payload, queryClient);
-      break;
-  }
-}
+  const record = payload.eventType === "DELETE" ? payload.old : payload.new;
 
-// --- Cabinet members handlers ---
-
-export function handleCabinetMemberInsert(
-  payload: RealtimePayload<CabinetMemberRow>,
-  queryClient: QueryClient,
-  currentUserId: string,
-): void {
-  if (payload.new.user_id === currentUserId) return;
-  queryClient.invalidateQueries({ queryKey: ["cabinets"] });
-  queryClient.invalidateQueries({ queryKey: medicineKeys.lists() });
-  toast.info("Un nuovo membro si è unito all'armadietto");
-}
-
-export function handleCabinetMemberDelete(
-  payload: RealtimePayload<CabinetMemberRow>,
-  queryClient: QueryClient,
-  currentUserId: string,
-): void {
-  if (payload.old.user_id === currentUserId) {
-    toast.error("Sei stato rimosso da questo armadietto");
-    queryClient.clear();
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 2000);
+  if (record.id && mutationTracker.wasRecentlyMutated(record.id, payload.eventType)) {
     return;
   }
-  queryClient.invalidateQueries({ queryKey: ["cabinets"] });
-  queryClient.invalidateQueries({ queryKey: medicineKeys.lists() });
-  toast.info("Un membro ha lasciato l'armadietto");
+
+  if (record.cabinet_id) {
+    queryClient.invalidateQueries({ queryKey: medicineKeys.list(record.cabinet_id) });
+  } else {
+    queryClient.invalidateQueries({ queryKey: medicineKeys.all() });
+  }
+
+  if (payload.eventType === "DELETE") {
+    const name = record.custom_name || "Un farmaco";
+    toast.info(`${name} è stato eliminato da un altro utente`);
+  }
 }
+
+// --- Cabinet members handler ---
 
 export function handleCabinetMemberEvent(
   payload: RealtimePayload<CabinetMemberRow>,
   queryClient: QueryClient,
   currentUserId: string,
 ): void {
-  switch (payload.eventType) {
-    case "INSERT":
-      handleCabinetMemberInsert(payload, queryClient, currentUserId);
-      break;
-    case "DELETE":
-      handleCabinetMemberDelete(payload, queryClient, currentUserId);
-      break;
+  const record = payload.eventType === "DELETE" ? payload.old : payload.new;
+
+  if (payload.eventType === "INSERT") {
+    if (record.user_id === currentUserId) return;
+    queryClient.invalidateQueries({ queryKey: cabinetKeys.all() });
+    queryClient.invalidateQueries({ queryKey: medicineKeys.all() });
+    toast.info("Un nuovo membro si è unito all'armadietto");
+    return;
+  }
+
+  if (payload.eventType === "DELETE") {
+    if (record.user_id === currentUserId) {
+      toast.error("Sei stato rimosso da questo armadietto");
+      queryClient.invalidateQueries({ queryKey: cabinetKeys.all() });
+      if (record.cabinet_id) {
+        queryClient.removeQueries({ queryKey: medicineKeys.list(record.cabinet_id) });
+      }
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: cabinetKeys.all() });
+    queryClient.invalidateQueries({ queryKey: medicineKeys.all() });
+    toast.info("Un membro ha lasciato l'armadietto");
   }
 }

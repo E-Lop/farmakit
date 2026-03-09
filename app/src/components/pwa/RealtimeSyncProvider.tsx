@@ -1,7 +1,7 @@
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useSync } from "@/hooks/useSync";
 
-export function RealtimeSyncProvider() {
+export function SyncInitializer() {
   useRealtimeSync();
   useSync();
   return null;

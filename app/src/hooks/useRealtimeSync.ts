@@ -16,23 +16,12 @@ export function useRealtimeSync() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "user_medicines" },
-        (payload) => {
-          handleMedicineRealtimeEvent(
-            payload as unknown as Parameters<typeof handleMedicineRealtimeEvent>[0],
-            queryClient,
-          );
-        },
+        (payload) => handleMedicineRealtimeEvent(payload as never, queryClient),
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "cabinet_members" },
-        (payload) => {
-          handleCabinetMemberEvent(
-            payload as unknown as Parameters<typeof handleCabinetMemberEvent>[0],
-            queryClient,
-            user.id,
-          );
-        },
+        (payload) => handleCabinetMemberEvent(payload as never, queryClient, user.id),
       )
       .subscribe();
 

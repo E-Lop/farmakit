@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { onlineManager } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -17,19 +16,7 @@ import { registerMutationDefaults } from "@/lib/mutationDefaults";
 import { UpdateBanner } from "@/components/pwa/UpdateBanner";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { OfflineBanner } from "@/components/pwa/OfflineBanner";
-import { RealtimeSyncProvider } from "@/components/pwa/RealtimeSyncProvider";
-
-// Sincronizza React Query online manager con lo stato del browser
-onlineManager.setEventListener((setOnline) => {
-  const onlineHandler = () => setOnline(true);
-  const offlineHandler = () => setOnline(false);
-  window.addEventListener("online", onlineHandler);
-  window.addEventListener("offline", offlineHandler);
-  return () => {
-    window.removeEventListener("online", onlineHandler);
-    window.removeEventListener("offline", offlineHandler);
-  };
-});
+import { SyncInitializer } from "@/components/pwa/RealtimeSyncProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,7 +46,7 @@ export function App() {
     >
       <BrowserRouter>
         <AuthProvider>
-          <RealtimeSyncProvider />
+          <SyncInitializer />
           <UpdateBanner />
           <OfflineBanner />
           <Routes>

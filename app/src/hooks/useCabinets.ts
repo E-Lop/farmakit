@@ -5,17 +5,18 @@ import {
   updateCabinet,
   deleteCabinet,
 } from "@/lib/cabinets";
+import { cabinetKeys } from "@/lib/queryKeys";
 
 export function useCabinets() {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["cabinets"],
+    queryKey: cabinetKeys.all(),
     queryFn: getCabinets,
   });
 
   const invalidateCabinets = () =>
-    queryClient.invalidateQueries({ queryKey: ["cabinets"] });
+    queryClient.invalidateQueries({ queryKey: cabinetKeys.all() });
 
   const createMutation = useMutation({
     mutationFn: ({ name, icon }: { name: string; icon?: string }) =>

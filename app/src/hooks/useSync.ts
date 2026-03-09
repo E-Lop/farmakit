@@ -1,22 +1,27 @@
 import { useEffect, useCallback } from "react";
+import { onlineManager } from "@tanstack/react-query";
 import { useSyncStore } from "@/stores/syncStore";
 import { processPendingMutations, getPendingMutations } from "@/lib/sync";
 
 export function useSync() {
-  const { online, syncing, pendingCount, lastSyncedAt, setOnline, setSyncing, setPendingCount, setLastSynced } =
+  const { online, pendingCount, setOnline, setSyncing, setPendingCount, setLastSynced } =
     useSyncStore();
 
+  // Unica fonte di verità per lo stato online: onlineManager di React Query
   useEffect(() => {
     const handleOnline = () => setOnline(true);
     const handleOffline = () => setOnline(false);
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
+    onlineManager.setEventListener((setRQOnline) => {
+      const onlineHandler = () => { setRQOnline(true); handleOnline(); };
+      const offlineHandler = () => { setRQOnline(false); handleOffline(); };
+      window.addEventListener("online", onlineHandler);
+      window.addEventListener("offline", offlineHandler);
+      return () => {
+        window.removeEventListener("online", onlineHandler);
+        window.removeEventListener("offline", offlineHandler);
+      };
+    });
   }, [setOnline]);
 
   useEffect(() => {
@@ -24,7 +29,7 @@ export function useSync() {
   }, [setPendingCount]);
 
   const syncNow = useCallback(async () => {
-    if (!online || syncing) return;
+    if (!useSyncStore.getState().online || useSyncStore.getState().syncing) return;
     setSyncing(true);
     try {
       await processPendingMutations();
@@ -34,7 +39,7 @@ export function useSync() {
     } finally {
       setSyncing(false);
     }
-  }, [online, syncing, setSyncing, setPendingCount, setLastSynced]);
+  }, [setSyncing, setPendingCount, setLastSynced]);
 
   useEffect(() => {
     if (online && pendingCount > 0) {
@@ -42,5 +47,5 @@ export function useSync() {
     }
   }, [online, pendingCount, syncNow]);
 
-  return { online, syncing, pendingCount, lastSyncedAt, syncNow };
+  return { online, syncing: useSyncStore((s) => s.syncing), pendingCount, lastSyncedAt: useSyncStore((s) => s.lastSyncedAt), syncNow };
 }

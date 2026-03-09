@@ -4,7 +4,6 @@ import {
   updateUserMedicine,
   deleteUserMedicine,
 } from "./medicines";
-import { mutationTracker } from "./realtime";
 import type { MedicineFormData, UserMedicineEditable } from "@/types/medicine";
 
 export const mutationKeys = {
@@ -15,22 +14,19 @@ export const mutationKeys = {
 
 export function registerMutationDefaults(queryClient: QueryClient): void {
   queryClient.setMutationDefaults(mutationKeys.addMedicine, {
-    mutationFn: async (variables: { data: MedicineFormData; id: string }) => {
-      mutationTracker.track(variables.id, "INSERT");
-      return addUserMedicine(variables.data);
+    mutationFn: async (data: MedicineFormData) => {
+      return addUserMedicine(data);
     },
   });
 
   queryClient.setMutationDefaults(mutationKeys.updateMedicine, {
-    mutationFn: async (variables: { id: string; data: UserMedicineEditable }) => {
-      mutationTracker.track(variables.id, "UPDATE");
-      return updateUserMedicine(variables.id, variables.data);
+    mutationFn: async (variables: { id: string; updates: UserMedicineEditable }) => {
+      return updateUserMedicine(variables.id, variables.updates);
     },
   });
 
   queryClient.setMutationDefaults(mutationKeys.deleteMedicine, {
     mutationFn: async (id: string) => {
-      mutationTracker.track(id, "DELETE");
       await deleteUserMedicine(id);
     },
   });

@@ -17,7 +17,7 @@ registerRoute(
     cacheName: "medicines-catalog",
     plugins: [
       new ExpirationPlugin({ maxEntries: 5000, maxAgeSeconds: 60 * 60 * 24 }),
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new CacheableResponsePlugin({ statuses: [200] }),
     ],
   }),
 );

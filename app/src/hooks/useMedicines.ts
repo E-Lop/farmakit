@@ -1,10 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserMedicines, addUserMedicine, updateUserMedicine, deleteUserMedicine } from "@/lib/medicines";
+import { medicineKeys } from "@/lib/queryKeys";
+import { mutationKeys } from "@/lib/mutationDefaults";
+import { mutationTracker } from "@/lib/realtime";
 import type { UserMedicine } from "@/types/medicine";
 
 export function useMedicines(cabinetId: string | null) {
   const queryClient = useQueryClient();
-  const queryKey = ["user-medicines", cabinetId];
+  const queryKey = cabinetId ? medicineKeys.list(cabinetId) : medicineKeys.all();
 
   const query = useQuery({
     queryKey,
@@ -16,13 +19,20 @@ export function useMedicines(cabinetId: string | null) {
     queryClient.invalidateQueries({ queryKey });
 
   const addMutation = useMutation({
+    mutationKey: mutationKeys.addMedicine,
     mutationFn: addUserMedicine,
-    onSuccess: invalidateMedicines,
+    onSuccess: (data) => {
+      mutationTracker.track(data.id, "INSERT");
+      invalidateMedicines();
+    },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof updateUserMedicine>[1] }) =>
-      updateUserMedicine(id, updates),
+    mutationKey: mutationKeys.updateMedicine,
+    mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof updateUserMedicine>[1] }) => {
+      mutationTracker.track(id, "UPDATE");
+      return updateUserMedicine(id, updates);
+    },
     onMutate: async ({ id, updates }) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<UserMedicine[]>(queryKey);
@@ -40,7 +50,11 @@ export function useMedicines(cabinetId: string | null) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteUserMedicine,
+    mutationKey: mutationKeys.deleteMedicine,
+    mutationFn: (id: string) => {
+      mutationTracker.track(id, "DELETE");
+      return deleteUserMedicine(id);
+    },
     onSuccess: invalidateMedicines,
   });
 
