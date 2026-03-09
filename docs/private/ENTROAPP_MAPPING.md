@@ -11,22 +11,16 @@ EntroApp è un progetto con stack analogo (React 19, Supabase, Tailwind, shadcn/
 | Hook barcode scanner | `src/hooks/useBarcodeScanner.ts` | `app/src/hooks/useBarcodeScanner.ts` | Allineato: state machine, fix iOS, cleanup stream, torch, hasScannedRef |
 | Componente scanner | `src/components/barcode/BarcodeScanner.tsx` | `app/src/components/barcode/BarcodeScanner.tsx` | Adattato da dialog a pagina inline |
 
-## Fase 3 — Offline + PWA
+## Fase 3 — Offline + PWA ✅ (già applicato)
 
-| Funzionalità | File EntroApp | Adattamento Farmakit |
-|---|---|---|
-| Service Worker (Workbox) | `src/sw.ts` | Cache-first per Google Fonts e Supabase Storage. SPA fallback. Adattare URL patterns |
-| VitePWA config | `vite.config.ts` (sezione PWA) | `injectManifest` strategy, auto-update, manifest con icone e tema Farmakit |
-| IndexedDB persister | `src/lib/queryPersister.ts` | Copia diretta — `idb-keyval` + `PersistQueryClientProvider` con 24h maxAge |
-| Mutation queue offline | `src/lib/mutationDefaults.ts` | Adattare mutation keys: `addUserMedicine`, `deleteUserMedicine`, `createCabinet` |
-| Realtime sync | `src/lib/realtime.ts` | Canali per `user_medicines` e `cabinet_members` con deduplication tracker |
-| Pending images | `src/lib/pendingImages.ts` | Non necessario per Farmakit (no immagini farmaci) |
-
-### Pattern chiave da EntroApp
-- **PersistQueryClientProvider**: wrappa QueryClientProvider, persiste cache in IndexedDB
-- **Mutation resume**: mutazioni pendenti riprese automaticamente al reload
-- **RecentMutationsTracker**: previene duplicati quando realtime + locale si sovrappongono (finestra 5-10s)
-- **Online detection**: React Query `onlineManager` sincronizzato con eventi browser
+| Funzionalità | File EntroApp | File Farmakit | Note |
+|---|---|---|---|
+| Service Worker (Workbox) | `src/sw.ts` | `app/src/sw.ts` | Semplificato: no Google Fonts, no Supabase Storage images. Solo precache + catalogo farmaci SWR |
+| VitePWA config | `vite.config.ts` | `app/vite.config.ts` | `injectManifest` strategy, `registerType: "prompt"` |
+| IndexedDB persister | `src/lib/queryPersister.ts` | `app/src/lib/queryPersister.ts` | Adattato chiave IDB a `farmakit-react-query-cache` |
+| Mutation defaults | `src/lib/mutationDefaults.ts` | `app/src/lib/mutationDefaults.ts` | Keys: addMedicine, updateMedicine, deleteMedicine. No pending images |
+| Realtime sync | `src/lib/realtime.ts` | `app/src/lib/realtime.ts` | Canali: user_medicines + cabinet_members. RecentMutationsTracker inline |
+| Pending images | `src/lib/pendingImages.ts` | — | Non necessario per Farmakit (no immagini farmaci) |
 
 ## Fase 4 — Condivisione
 

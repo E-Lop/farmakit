@@ -28,12 +28,15 @@
 - [x] Associazione farmaco catalogo ↔ inventario (pre-fill AddMedicine da catalogo/scan)
 - [x] Test hooks barcode e lookup (42 test totali)
 
-## Fase 3 — Offline + PWA
-- [ ] Service Worker con VitePWA (injectManifest, Workbox) — _da EntroApp: sw.ts, vite.config.ts_
-- [ ] Cache catalogo farmaci in IndexedDB — _da EntroApp: queryPersister.ts_
-- [ ] Mutation queue per operazioni offline — _da EntroApp: mutationDefaults.ts_
-- [ ] Sync bidirezionale online/offline — _da EntroApp: realtime.ts_
-- [ ] Install prompt e update banner
+## Fase 3 — Offline + PWA ✅
+- [x] Service Worker custom con VitePWA (injectManifest, Workbox) — precache shell + runtime cache catalogo
+- [x] Cache React Query in IndexedDB (PersistQueryClientProvider, 24h maxAge)
+- [x] Mutation defaults per resume mutazioni offline dopo reload
+- [x] Sync bidirezionale: Supabase Realtime (user_medicines, cabinet_members) con deduplication tracker
+- [x] React Query onlineManager sincronizzato con eventi browser
+- [x] Install prompt (beforeinstallprompt)
+- [x] Update banner ("Nuova versione disponibile")
+- [x] Offline banner (stato offline, sync in corso, mutazioni pendenti)
 
 ## Fase 4 — Condivisione
 - [ ] Invito membri con short code — _da EntroApp: invites.ts, Edge Function_

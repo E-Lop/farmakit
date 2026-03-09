@@ -129,7 +129,7 @@ export function AddMedicine() {
         notify_before_days: 30,
       });
       toast.success("Farmaco aggiunto");
-      navigate(-1);
+      navigate(`/?cabinet=${activeCabinetId}`);
     } catch {
       toast.error("Errore nell'aggiunta del farmaco");
     } finally {

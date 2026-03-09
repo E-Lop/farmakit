@@ -43,11 +43,13 @@ export function MedicineCard({
   ].filter(Boolean);
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onTap}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
       className={cn(
-        "rounded-xl border bg-card p-3 shadow-sm animate-slide-up text-left w-full transition-shadow active:shadow-md",
+        "rounded-xl border bg-card p-3 shadow-sm animate-slide-up text-left w-full transition-shadow active:shadow-md cursor-pointer",
         isExpiring ? "border-destructive/50" : "border-border",
       )}
       style={{ animationDelay: `${index * 50}ms` }}
@@ -109,6 +111,6 @@ export function MedicineCard({
           </Badge>
         )}
       </div>
-    </button>
+    </div>
   );
 }
