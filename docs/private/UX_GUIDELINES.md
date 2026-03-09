@@ -55,13 +55,20 @@ Ogni azione ha feedback visivo (loading, successo, errore). Nessuna azione silen
 
 ### Card farmaco
 ```
-┌─────────────────────────────────┐
-│ 💊 Tachipirina 500mg            │
-│ Paracetamolo                    │
-│ Qtà: 2  ·  Scade: 15/06/2026   │
-│ [Badge: In scadenza]            │
-└─────────────────────────────────┘
+Forme contabili (compressa, capsula, cerotto…):
+┌──────────────────────────────────────┐
+│ Tachipirina 500mg       [-] 2 [+]   │
+│ ⏳ 15 giu 2026 · Compressa 500mg    │
+└──────────────────────────────────────┘
+
+Forme non contabili (sciroppo, crema, gel, spray…):
+┌──────────────────────────────────────┐
+│ Nurofen Febbre e Dolore              │
+│ ⏳ 15 giu 2026 · Sciroppo 100mg/5ml │
+└──────────────────────────────────────┘
 ```
+Per le forme non contabili lo stepper quantità è nascosto.
+La distinzione è gestita da `isCountableForm()` in `app/src/lib/pharmaceutical-forms.ts`.
 
 ### Scanner barcode
 - Viewport fotocamera a schermo intero (quasi)
@@ -71,7 +78,7 @@ Ogni azione ha feedback visivo (loading, successo, errore). Nessuna azione silen
 
 ### Form aggiunta
 - Ricerca farmaco con autocomplete
-- Campi: quantità (stepper ±), scadenza (date picker nativo), note
+- Campi: forma farmaceutica, dosaggio, quantità (stepper ±, solo forme contabili), scadenza (date picker nativo), note
 - Bottone salva prominente in basso
 
 ## Interazioni

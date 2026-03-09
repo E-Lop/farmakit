@@ -5,9 +5,6 @@ import {
   Archive,
   Plus,
   Users,
-  ChevronRight,
-  Pencil,
-  Trash2,
   PackageOpen,
 } from "lucide-react";
 import { useCabinets } from "@/hooks/useCabinets";
@@ -25,6 +22,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { CabinetDetailDrawer } from "@/components/cabinets/cabinet-detail-drawer";
 import type { CabinetWithRole } from "@/types/cabinet";
 
 type DialogMode =
@@ -45,6 +43,8 @@ export function Cabinets() {
   const [dialog, setDialog] = useState<DialogMode>(null);
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [drawerCabinet, setDrawerCabinet] = useState<CabinetWithRole | null>(null);
 
   const openCreate = () => {
     setName("");
@@ -115,11 +115,20 @@ export function Cabinets() {
           isLoading={isLoading}
           cabinets={cabinets}
           onCreate={openCreate}
-          onTap={(id) => navigate(`/?cabinet=${id}`)}
-          onEdit={openEdit}
-          onDelete={openDelete}
+          onTap={setDrawerCabinet}
         />
       </PageLayout>
+
+      <CabinetDetailDrawer
+        cabinet={drawerCabinet}
+        open={drawerCabinet !== null}
+        onOpenChange={(open) => {
+          if (!open) setDrawerCabinet(null);
+        }}
+        onNavigate={() => navigate(`/?cabinet=${drawerCabinet!.id}`)}
+        onEdit={() => openEdit(drawerCabinet!)}
+        onDelete={() => openDelete(drawerCabinet!)}
+      />
 
       {/* Create / Edit dialog */}
       <Dialog
@@ -206,9 +215,7 @@ interface CabinetsContentProps {
   isLoading: boolean;
   cabinets: CabinetWithRole[];
   onCreate: () => void;
-  onTap: (id: string) => void;
-  onEdit: (cabinet: CabinetWithRole) => void;
-  onDelete: (cabinet: CabinetWithRole) => void;
+  onTap: (cabinet: CabinetWithRole) => void;
 }
 
 function CabinetsContent({
@@ -216,8 +223,6 @@ function CabinetsContent({
   cabinets,
   onCreate,
   onTap,
-  onEdit,
-  onDelete,
 }: CabinetsContentProps) {
   if (isLoading) {
     return (
@@ -244,9 +249,7 @@ function CabinetsContent({
           key={cabinet.id}
           cabinet={cabinet}
           index={i}
-          onTap={() => onTap(cabinet.id)}
-          onEdit={() => onEdit(cabinet)}
-          onDelete={() => onDelete(cabinet)}
+          onTap={() => onTap(cabinet)}
         />
       ))}
     </div>
@@ -283,20 +286,16 @@ function CabinetCard({
   cabinet,
   index,
   onTap,
-  onEdit,
-  onDelete,
 }: {
   cabinet: CabinetWithRole;
   index: number;
   onTap: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
 }) {
   const isOwner = cabinet.role === "owner";
 
   return (
     <div
-      className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow active:shadow-md animate-slide-up"
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow active:shadow-md animate-slide-up"
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <button
@@ -327,35 +326,7 @@ function CabinetCard({
             </span>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-active:translate-x-0.5" />
       </button>
-
-      {isOwner && (
-        <div className="absolute right-12 top-1/2 flex -translate-y-1/2 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            aria-label="Modifica"
-          >
-            <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            aria-label="Elimina"
-          >
-            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

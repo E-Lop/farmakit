@@ -45,7 +45,7 @@ L'utente aggiunge un farmaco inserendo nome, quantità, scadenza.
 1. Tap "+" → pagina AddMedicine
 2. Opzione 1: cerca nel catalogo per nome
 3. Opzione 2: inserisci nome custom
-4. Compila: quantità, scadenza (opzionale), note (opzionale)
+4. Compila: forma farmaceutica, dosaggio, quantità, scadenza (opzionale), note (opzionale)
 5. Salva → torna a Dashboard
 
 ### Validazione
@@ -53,6 +53,15 @@ L'utente aggiunge un farmaco inserendo nome, quantità, scadenza.
 - Quantità >= 0
 - Scadenza: data valida se presente
 - Armadietto: selezionato automaticamente (attivo)
+
+### Forme farmaceutiche contabili vs non contabili
+Le forme farmaceutiche si dividono in **contabili** (compresse, capsule, supposte, cerotti…) e **non contabili** (sciroppo, soluzione, gocce, crema, gel, pomata, spray, collirio…).
+Per le forme non contabili il conteggio unitario non ha senso pratico, quindi:
+- Lo stepper quantità [-] N [+] è nascosto nella card
+- Il campo quantità non appare nel drawer di dettaglio (view e edit)
+- Le forme non contabili sono escluse dagli alert di scorta bassa
+
+La logica è in `app/src/lib/pharmaceutical-forms.ts` (`isCountableForm`).
 
 ## F4 — Scansione barcode
 
@@ -81,7 +90,7 @@ Vista principale con lista farmaci dell'armadietto attivo.
 ### Layout
 - Header: nome armadietto (tap per switchare) + icona settings
 - Lista farmaci ordinata per scadenza (prossimi in cima)
-- Badges: "In scadenza" (< 30gg), "Scaduto" (rosso), "Scorta bassa" (quantità 0-1)
+- Badges: "In scadenza" (< 30gg), "Scaduto" (rosso), "Scorta bassa" (quantità ≤ 5, solo forme contabili)
 - FAB: bottone scan + bottone aggiungi manuale
 - Bottom navigation: Dashboard, Scan, Armadietti, Settings
 

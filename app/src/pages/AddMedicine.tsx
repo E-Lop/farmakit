@@ -9,6 +9,13 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Medicine } from "@/types/medicine";
 
 // Forme farmaceutiche più comuni per uso domestico (coerenti con catalogo AIFA)
@@ -165,18 +172,21 @@ export function AddMedicine() {
                 {cabinets[0].name}
               </div>
             ) : (
-              <select
-                id="cabinet"
+              <Select
                 value={activeCabinetId ?? ""}
-                onChange={(e) => setSelectedCabinetId(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                onValueChange={setSelectedCabinetId}
               >
-                {cabinets.map((cab) => (
-                  <option key={cab.id} value={cab.id}>
-                    {cab.icon ? `${cab.icon} ` : ""}{cab.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="cabinet">
+                  <SelectValue placeholder="Seleziona armadietto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cabinets.map((cab) => (
+                    <SelectItem key={cab.id} value={cab.id}>
+                      {cab.icon ? `${cab.icon} ` : ""}{cab.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
 

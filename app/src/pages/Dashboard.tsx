@@ -1,20 +1,16 @@
+import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import {
-  Plus,
-  Pill,
-  AlertTriangle,
-  Calendar,
-  Archive,
-} from "lucide-react";
-import { differenceInDays, format, parseISO } from "date-fns";
-import { it } from "date-fns/locale";
+import { Plus, Pill, Archive } from "lucide-react";
+import { toast } from "sonner";
 import { useCabinets } from "@/hooks/useCabinets";
 import { useMedicines } from "@/hooks/useMedicines";
+import { useCabinetAlerts, type CabinetAlerts } from "@/hooks/useCabinetAlerts";
 import { Header } from "@/components/layout/Header";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { MedicineCard } from "@/components/medicines/medicine-card";
+import { MedicineDetailDrawer } from "@/components/medicines/medicine-detail-drawer";
 import type { Cabinet } from "@/types/cabinet";
 import type { UserMedicine } from "@/types/medicine";
 
@@ -28,14 +24,43 @@ export function Dashboard() {
     ? cabinets.find((c) => c.id === cabinetId)
     : cabinets[0];
 
-  const { medicines, isLoading: medsLoading } = useMedicines(
-    activeCabinet?.id ?? null,
-  );
+  const { medicines, isLoading: medsLoading, updateMedicine, deleteMedicine } =
+    useMedicines(activeCabinet?.id ?? null);
+
+  const alertsByCabinet = useCabinetAlerts(cabinets.map((c) => c.id));
 
   const isLoading = cabinetsLoading || medsLoading;
 
+  const [selectedMedicine, setSelectedMedicine] = useState<UserMedicine | null>(null);
+
   const handleSelectCabinet = (id: string) => {
     setSearchParams({ cabinet: id });
+  };
+
+  const handleQuantityChange = async (med: UserMedicine, newQuantity: number) => {
+    try {
+      await updateMedicine({ id: med.id, updates: { quantity: newQuantity } });
+    } catch {
+      toast.error("Errore nell'aggiornamento");
+    }
+  };
+
+  const handleUpdate = async (id: string, updates: Parameters<typeof updateMedicine>[0]["updates"]) => {
+    try {
+      await updateMedicine({ id, updates });
+      toast.success("Farmaco aggiornato");
+    } catch {
+      toast.error("Errore nell'aggiornamento");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMedicine(id);
+      toast.success("Farmaco eliminato");
+    } catch {
+      toast.error("Errore nell'eliminazione");
+    }
   };
 
   return (
@@ -64,6 +89,7 @@ export function Dashboard() {
             cabinets={cabinets}
             activeId={activeCabinet?.id ?? null}
             onSelect={handleSelectCabinet}
+            alertsByCabinet={alertsByCabinet}
           />
         )}
 
@@ -73,8 +99,20 @@ export function Dashboard() {
           medicines={medicines}
           onNavigateCabinets={() => navigate("/cabinets")}
           onAddMedicine={() => navigate(`/add?cabinet=${activeCabinet!.id}`)}
+          onTapMedicine={setSelectedMedicine}
+          onQuantityChange={handleQuantityChange}
         />
       </PageLayout>
+
+      <MedicineDetailDrawer
+        medicine={selectedMedicine}
+        open={selectedMedicine !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedMedicine(null);
+        }}
+        onUpdate={handleUpdate}
+        onDelete={handleDelete}
+      />
     </>
   );
 }
@@ -83,23 +121,26 @@ function CabinetTabs({
   cabinets,
   activeId,
   onSelect,
+  alertsByCabinet,
 }: {
   cabinets: Cabinet[];
   activeId: string | null;
   onSelect: (id: string) => void;
+  alertsByCabinet: Record<string, CabinetAlerts>;
 }) {
   return (
-    <div className="-mx-4 mb-3 overflow-x-auto px-4">
-      <div className="flex gap-2">
+    <div className="-mx-4 mb-3 overflow-x-auto px-4 pt-2">
+      <div className="flex gap-3 pr-2">
         {cabinets.map((cab) => {
           const isActive = cab.id === activeId;
+          const alerts = alertsByCabinet[cab.id];
           return (
             <button
               key={cab.id}
               type="button"
               onClick={() => onSelect(cab.id)}
               className={cn(
-                "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                "relative shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
                 isActive
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-card text-muted-foreground hover:text-foreground",
@@ -107,6 +148,11 @@ function CabinetTabs({
             >
               {cab.icon && <span className="mr-1.5">{cab.icon}</span>}
               {cab.name}
+              {alerts && alerts.total > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                  {alerts.total}
+                </span>
+              )}
             </button>
           );
         })}
@@ -121,6 +167,8 @@ interface DashboardContentProps {
   medicines: UserMedicine[];
   onNavigateCabinets: () => void;
   onAddMedicine: () => void;
+  onTapMedicine: (med: UserMedicine) => void;
+  onQuantityChange: (med: UserMedicine, newQuantity: number) => void;
 }
 
 function DashboardContent({
@@ -129,11 +177,26 @@ function DashboardContent({
   medicines,
   onNavigateCabinets,
   onAddMedicine,
+  onTapMedicine,
+  onQuantityChange,
 }: DashboardContentProps) {
   if (isLoading) return <LoadingSkeleton />;
   if (cabinets.length === 0) return <NoCabinetsState onNavigate={onNavigateCabinets} />;
   if (medicines.length === 0) return <EmptyMedicinesState onAdd={onAddMedicine} />;
-  return <MedicineList medicines={medicines} />;
+
+  return (
+    <div className="flex flex-col gap-2 pt-2">
+      {medicines.map((med, i) => (
+        <MedicineCard
+          key={med.id}
+          medicine={med}
+          index={i}
+          onTap={() => onTapMedicine(med)}
+          onQuantityChange={(qty) => onQuantityChange(med, qty)}
+        />
+      ))}
+    </div>
+  );
 }
 
 function LoadingSkeleton() {
@@ -186,69 +249,6 @@ function EmptyMedicinesState({ onAdd }: { onAdd: () => void }) {
         <Plus className="h-4 w-4" />
         Aggiungi farmaco
       </Button>
-    </div>
-  );
-}
-
-function getExpiryStatus(expiryDate: string | null) {
-  if (!expiryDate) return null;
-  const days = differenceInDays(parseISO(expiryDate), new Date());
-  if (days < 0) return { label: "Scaduto", variant: "destructive" as const };
-  if (days <= 30)
-    return { label: `Scade tra ${days}g`, variant: "destructive" as const };
-  if (days <= 90)
-    return { label: `Scade tra ${days}g`, variant: "outline" as const };
-  return null;
-}
-
-function MedicineList({ medicines }: { medicines: UserMedicine[] }) {
-  return (
-    <div className="flex flex-col gap-2 pt-2">
-      {medicines.map((med, i) => {
-        const displayName =
-          med.medicine?.name ?? med.custom_name ?? "Farmaco senza nome";
-        const expiry = getExpiryStatus(med.expiry_date);
-
-        return (
-          <div
-            key={med.id}
-            className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm animate-slide-up"
-            style={{ animationDelay: `${i * 50}ms` }}
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent">
-              {expiry?.variant === "destructive" ? (
-                <AlertTriangle
-                  className="h-5 w-5 text-destructive"
-                  strokeWidth={1.5}
-                />
-              ) : (
-                <Pill className="h-5 w-5 text-primary" strokeWidth={1.5} />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-card-foreground">
-                {displayName}
-              </p>
-              <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                {med.expiry_date && (
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {format(parseISO(med.expiry_date), "dd MMM yyyy", {
-                      locale: it,
-                    })}
-                  </span>
-                )}
-                <span>Qtà: {med.quantity}</span>
-              </div>
-            </div>
-            {expiry && (
-              <Badge variant={expiry.variant} className="shrink-0 text-[10px]">
-                {expiry.label}
-              </Badge>
-            )}
-          </div>
-        );
-      })}
     </div>
   );
 }

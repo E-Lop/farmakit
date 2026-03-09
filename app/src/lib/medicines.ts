@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Medicine, UserMedicine, MedicineFormData } from "@/types/medicine";
+import type { Medicine, UserMedicine, UserMedicineEditable, MedicineFormData } from "@/types/medicine";
 
 export async function searchMedicines(query: string): Promise<Medicine[]> {
   const { data, error } = await supabase
@@ -43,6 +43,40 @@ export async function addUserMedicine(form: MedicineFormData): Promise<UserMedic
 
   if (error) throw error;
   return data;
+}
+
+export async function updateUserMedicine(
+  id: string,
+  updates: UserMedicineEditable,
+): Promise<UserMedicine> {
+  const { data, error } = await supabase
+    .from("user_medicines")
+    .update(updates)
+    .eq("id", id)
+    .select("*, medicine:medicines(*)")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export interface MedicineSummary {
+  id: string;
+  cabinet_id: string;
+  quantity: number;
+  expiry_date: string | null;
+  pharmaceutical_form: string | null;
+}
+
+export async function getAllUserMedicines(cabinetIds: string[]): Promise<MedicineSummary[]> {
+  if (cabinetIds.length === 0) return [];
+  const { data, error } = await supabase
+    .from("user_medicines")
+    .select("id, cabinet_id, quantity, expiry_date, pharmaceutical_form")
+    .in("cabinet_id", cabinetIds);
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function deleteUserMedicine(id: string): Promise<void> {

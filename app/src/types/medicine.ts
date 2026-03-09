@@ -30,6 +30,10 @@ export interface UserMedicine {
   medicine?: Medicine;
 }
 
+export type UserMedicineEditable = Partial<
+  Pick<UserMedicine, "quantity" | "expiry_date" | "notes" | "custom_name" | "pharmaceutical_form" | "strength">
+>;
+
 export interface MedicineFormData {
   medicine_id?: string;
   custom_name?: string;

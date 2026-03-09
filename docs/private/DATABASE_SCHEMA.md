@@ -49,6 +49,13 @@ Inventario farmaci nell'armadietto.
 - Se il farmaco è nel catalogo: `medicine_id` è popolato
 - Se il farmaco non è nel catalogo: `custom_name` è usato come fallback
 
+**Colonne aggiuntive**:
+- `pharmaceutical_form` (text, nullable) — forma farmaceutica (es. Compressa, Sciroppo). Usata per distinguere forme contabili da non contabili (vedi sotto)
+- `strength` (text, nullable) — dosaggio (es. 500mg, 200mg/5ml)
+
+**Forme contabili vs non contabili**:
+Le forme farmaceutiche non contabili (sciroppo, soluzione, gocce, crema, gel, pomata, spray, collirio) sono escluse dallo stepper quantità e dagli alert di scorta bassa. La logica è in `app/src/lib/pharmaceutical-forms.ts` (`isCountableForm`).
+
 **Note**:
 - `notify_before_days` default 30 — notifica 30 giorni prima della scadenza
 - `barcode` è duplicato qui per reference rapida (il barcode originale è anche in medicines)

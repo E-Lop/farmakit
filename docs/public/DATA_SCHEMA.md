@@ -75,6 +75,8 @@ Farmaci nell'armadietto dell'utente.
 | cabinet_id | uuid | FK → cabinets, NOT NULL |
 | medicine_id | uuid | FK → medicines, nullable |
 | custom_name | text | Nome personalizzato se non in catalogo |
+| pharmaceutical_form | text | Forma farmaceutica (es. Compressa, Sciroppo) |
+| strength | text | Dosaggio (es. 500mg, 200mg/5ml) |
 | quantity | integer | >= 0, default 1 |
 | expiry_date | date | Data scadenza |
 | notes | text | Note libere |
