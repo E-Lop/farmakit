@@ -9,12 +9,20 @@ const NON_COUNTABLE_KEYWORDS = [
   "gocce orali",
   "sospensione orale",
   "soluzione iniettabile",
+  "soluzione per infusione",
+  "soluzione da nebulizzare",
+  "soluzione cutanea",
   "crema",
   "gel",
   "pomata",
+  "unguento",
+  "emulsione",
+  "schiuma",
   "spray",
-  "spray nasale",
   "collirio",
+  "collutorio",
+  "colluttorio",
+  "shampoo",
 ] as const;
 
 export function isCountableForm(form: string | null | undefined): boolean {
