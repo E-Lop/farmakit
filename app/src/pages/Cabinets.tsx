@@ -45,6 +45,7 @@ export function Cabinets() {
   const [submitting, setSubmitting] = useState(false);
 
   const [drawerCabinet, setDrawerCabinet] = useState<CabinetWithRole | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const openCreate = () => {
     setName("");
@@ -115,16 +116,17 @@ export function Cabinets() {
           isLoading={isLoading}
           cabinets={cabinets}
           onCreate={openCreate}
-          onTap={setDrawerCabinet}
+          onTap={(cabinet) => {
+            setDrawerCabinet(cabinet);
+            setDrawerOpen(true);
+          }}
         />
       </PageLayout>
 
       <CabinetDetailDrawer
         cabinet={drawerCabinet}
-        open={drawerCabinet !== null}
-        onOpenChange={(open) => {
-          if (!open) setDrawerCabinet(null);
-        }}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
         onNavigate={() => navigate(`/?cabinet=${drawerCabinet!.id}`)}
         onEdit={() => openEdit(drawerCabinet!)}
         onDelete={() => openDelete(drawerCabinet!)}

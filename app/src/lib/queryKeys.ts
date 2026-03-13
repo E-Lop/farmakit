@@ -5,4 +5,5 @@ export const medicineKeys = {
 
 export const cabinetKeys = {
   all: () => ["cabinets"] as const,
+  members: (cabinetId: string) => ["cabinet-members", cabinetId] as const,
 };

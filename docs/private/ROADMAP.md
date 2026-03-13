@@ -38,11 +38,13 @@
 - [x] Update banner ("Nuova versione disponibile")
 - [x] Offline banner (stato offline, sync in corso, mutazioni pendenti)
 
-## Fase 4 — Condivisione
-- [ ] Invito membri con short code — _da EntroApp: invites.ts, Edge Function_
-- [ ] Gestione ruoli (owner/editor)
-- [ ] Vista membri armadietto — _da EntroApp: sharing/ components_
-- [ ] Rimozione membri e uscita da armadietto condiviso
+## Fase 4 — Condivisione ✅
+- [x] Invito membri con short code (6 char, scadenza 7gg, Edge Function create-invite/accept-invite)
+- [x] Gestione ruoli (owner/editor) con badge e permessi differenziati
+- [x] Vista membri armadietto (MembersSheet con rimozione per owner)
+- [x] Rimozione membri e uscita da armadietto condiviso (LeaveDialog + policy RLS self-removal)
+- [x] Pagina /join/:code per accettazione inviti (con redirect login se non autenticato)
+- [x] InviteDialog con codice visuale, copia link, Web Share API
 
 ## Fase 5 — Notifiche + Community
 - [ ] Notifiche scadenza farmaci (in-app)

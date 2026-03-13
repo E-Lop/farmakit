@@ -11,6 +11,7 @@ import { Scan } from "@/pages/Scan";
 import { AddMedicine } from "@/pages/AddMedicine";
 import { Cabinets } from "@/pages/Cabinets";
 import { Settings } from "@/pages/Settings";
+import { JoinPage } from "@/pages/JoinPage";
 import { createIDBPersister } from "@/lib/queryPersister";
 import { registerMutationDefaults } from "@/lib/mutationDefaults";
 import { UpdateBanner } from "@/components/pwa/UpdateBanner";
@@ -51,6 +52,7 @@ export function App() {
           <OfflineBanner />
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/join/:code" element={<JoinPage />} />
             <Route
               element={
                 <ProtectedRoute>

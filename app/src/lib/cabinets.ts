@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Cabinet, CabinetWithRole } from "@/types/cabinet";
+import type { Cabinet, CabinetMember, CabinetWithRole } from "@/types/cabinet";
 
 export async function getCabinets(): Promise<CabinetWithRole[]> {
   const { data, error } = await supabase
@@ -50,14 +50,40 @@ export async function createCabinet(name: string, icon?: string): Promise<Cabine
   return data;
 }
 
-export async function inviteMember(cabinetId: string, email: string): Promise<void> {
-  const { error } = await supabase.functions.invoke("invite-member", {
-    body: { cabinet_id: cabinetId, email },
-  });
-  if (error) throw error;
-}
-
 export async function deleteCabinet(id: string): Promise<void> {
   const { error } = await supabase.from("cabinets").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function getCabinetMembers(
+  cabinetId: string,
+): Promise<CabinetMember[]> {
+  const { data, error } = await supabase
+    .from("cabinet_members")
+    .select("id, cabinet_id, user_id, role, created_at")
+    .eq("cabinet_id", cabinetId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function removeCabinetMember(
+  cabinetId: string,
+  userId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("cabinet_members")
+    .delete()
+    .eq("cabinet_id", cabinetId)
+    .eq("user_id", userId);
+
+  if (error) throw error;
+}
+
+export async function leaveCabinet(
+  cabinetId: string,
+  userId: string,
+): Promise<void> {
+  await removeCabinetMember(cabinetId, userId);
 }
