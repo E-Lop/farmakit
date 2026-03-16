@@ -1,10 +1,11 @@
 import { useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader2, Check, X, KeyboardIcon } from "lucide-react";
+import { Loader2, Check, X, KeyboardIcon, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useMedicineLookup } from "@/hooks/useMedicineLookup";
 import { useCabinets } from "@/hooks/useCabinets";
 import { BarcodeScanner } from "@/components/barcode/BarcodeScanner";
+import { ContributeDialog } from "@/components/community/ContributeDialog";
 import { Header } from "@/components/layout/Header";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function Scan() {
   const [barcode, setBarcode] = useState("");
   const [manualCode, setManualCode] = useState("");
   const [foundMedicine, setFoundMedicine] = useState<Medicine | null>(null);
+  const [contributeOpen, setContributeOpen] = useState(false);
 
   const handleLookup = useCallback(
     async (code: string) => {
@@ -197,6 +199,19 @@ export function Scan() {
                   Aggiungi manualmente
                 </Button>
               </div>
+              <Button
+                variant="ghost"
+                className="w-full gap-2 text-muted-foreground"
+                onClick={() => setContributeOpen(true)}
+              >
+                <Heart className="h-4 w-4" />
+                Segnala questo farmaco alla community
+              </Button>
+              <ContributeDialog
+                open={contributeOpen}
+                onOpenChange={setContributeOpen}
+                barcode={barcode}
+              />
             </div>
           )}
         </div>

@@ -11,6 +11,7 @@ import { Scan } from "@/pages/Scan";
 import { AddMedicine } from "@/pages/AddMedicine";
 import { Cabinets } from "@/pages/Cabinets";
 import { Settings } from "@/pages/Settings";
+import { AdminContributions } from "@/pages/AdminContributions";
 import { JoinPage } from "@/pages/JoinPage";
 import { createIDBPersister } from "@/lib/queryPersister";
 import { registerMutationDefaults } from "@/lib/mutationDefaults";
@@ -65,6 +66,7 @@ export function App() {
               <Route path="/add" element={<AddMedicine />} />
               <Route path="/cabinets" element={<Cabinets />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/admin/contributions" element={<AdminContributions />} />
             </Route>
           </Routes>
         </AuthProvider>

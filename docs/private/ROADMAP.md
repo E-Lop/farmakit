@@ -46,12 +46,17 @@
 - [x] Pagina /join/:code per accettazione inviti (con redirect login se non autenticato)
 - [x] InviteDialog con codice visuale, copia link, Web Share API
 
-## Fase 5 — Notifiche + Community
-- [ ] Notifiche scadenza farmaci (in-app)
-- [ ] Push notifications (VAPID + Web Push) — _da EntroApp: pushNotifications.ts, sw.ts push handler_
-- [ ] Preferenze notifiche (quiet hours, intervalli) — _da EntroApp: useNotificationPreferences.ts_
-- [ ] Contribuzioni community (nuovo farmaco, barcode, correzione)
-- [ ] Moderazione contribuzioni (admin) — _da costruire ex novo_
+## Fase 5 — Notifiche + Community ✅
+- [x] Push notifications (VAPID + Web Push) — push subscribe/unsubscribe, SW handlers, sync
+- [x] Preferenze notifiche (intervalli scadenza 30/7/1 giorni, quiet hours, timezone)
+- [x] UI notifiche in Settings (toggle push, intervalli, quiet hours)
+- [x] Edge Function send-expiry-notifications completata (batch DB, Web Push, cleanup subscription scadute)
+- [x] Contribuzioni community (segnala nuovo farmaco, barcode, correzione dal flusso scan)
+- [x] Auto-approvazione admin (contribuzioni da account admin applicate istantaneamente)
+- [x] Approvazione per consenso pesato (trust weight utente, soglia cluster 3.0)
+- [x] Pannello admin moderazione (/admin/contributions) con confidence score, trust badge, cluster info, cross-check catalogo
+- [x] Edge Functions condivise (_shared/cors.ts, _shared/medicines.ts)
+- [x] Test (56 test totali, 14 nuovi per push + contributions)
 
 ## Fase 6 — Polish
 - [ ] Onboarding primo utilizzo — _da EntroApp: GuidaPage.tsx, InstructionCard.tsx_
