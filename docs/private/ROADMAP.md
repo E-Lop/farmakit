@@ -60,7 +60,7 @@
 
 ## Fase 6 — Polish
 - [ ] Onboarding primo utilizzo — _da EntroApp: GuidaPage.tsx, InstructionCard.tsx_
-- [ ] Tema scuro — _da EntroApp: useTheme.ts_
+- [x] Tema scuro — next-themes + palette Neutral Dark (light/dark/system, toggle in Settings, meta theme-color dinamica)
 - [ ] Statistiche (farmaci totali, in scadenza, per armadietto)
 - [ ] Export dati (GDPR) — _da EntroApp: dataExport.ts_
 - [ ] Haptics — _da EntroApp: haptics.ts_

@@ -39,11 +39,34 @@ Ogni azione ha feedback visivo (loading, successo, errore). Nessuna azione silen
 
 ## Colori
 
+### Tema chiaro (default)
 - **Primary**: verde (#16a34a) — salute, farmacia
 - **Destructive**: rosso (#ef4444) — scaduto, attenzione
 - **Warning**: ambra — in scadenza
-- **Background**: bianco
+- **Background**: bianco (#ffffff)
 - **Text**: quasi nero (#0a0a0a)
+- **Card**: bianco (#ffffff)
+- **Muted**: grigio chiaro (#f5f5f5)
+- **Border**: grigio (#e5e5e5)
+- **Accent**: verde chiarissimo (#f0fdf4)
+
+### Tema scuro (Neutral Dark)
+- **Primary**: verde (#16a34a) — invariato
+- **Destructive**: rosso (#dc2626) — leggermente più scuro per contrasto
+- **Background**: nero quasi puro (#0a0a0a)
+- **Text**: bianco (#fafafa)
+- **Card**: grigio scuro (#171717)
+- **Muted**: grigio (#262626)
+- **Muted text**: grigio chiaro (#a3a3a3)
+- **Border**: grigio (#262626)
+- **Accent**: verde scurissimo (#052e16)
+
+### Gestione tema
+- Tre modalità: **Sistema** (segue preferenze OS), **Chiaro**, **Scuro**
+- Default: Sistema (rileva `prefers-color-scheme` del browser)
+- Persistenza: `localStorage` con chiave `farmakit-theme`
+- Libreria: `next-themes` con `attribute="class"` (classe `.dark` su `<html>`)
+- Meta `theme-color` aggiornata dinamicamente (verde in light, nero in dark)
 
 ## Tipografia
 

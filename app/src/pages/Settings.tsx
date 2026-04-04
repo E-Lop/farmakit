@@ -21,7 +21,11 @@ import {
   AlertTriangle,
   Smartphone,
   Shield,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const EXPIRY_INTERVAL_OPTIONS = [
   { value: 30, label: "30 giorni" },
@@ -78,10 +82,17 @@ function PushStatusMessage({ status }: { status: PushStatus }) {
   }
 }
 
+const THEME_OPTIONS = [
+  { value: "system", label: "Sistema", icon: Monitor },
+  { value: "light", label: "Chiaro", icon: Sun },
+  { value: "dark", label: "Scuro", icon: Moon },
+] as const;
+
 export function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const isAdmin = useIsAdmin();
+  const { theme, setTheme } = useTheme();
   const { status, isLoading: pushLoading, subscribe, unsubscribe } = usePushSubscription();
   const { data: prefs } = useNotificationPreferences();
   const updatePrefs = useUpdateNotificationPreferences();
@@ -130,6 +141,32 @@ export function Settings() {
               <p className="truncate text-xs text-muted-foreground">
                 {user?.email}
               </p>
+            </div>
+          </div>
+
+          {/* Aspetto */}
+          <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+            <h3 className="text-sm font-medium">Aspetto</h3>
+            <div className="flex gap-2">
+              {THEME_OPTIONS.map((opt) => {
+                const Icon = opt.icon;
+                const isActive = theme === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setTheme(opt.value)}
+                    className={`flex flex-1 flex-col items-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

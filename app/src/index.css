@@ -46,4 +46,24 @@
     font-family: system-ui, -apple-system, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
+
+  .dark {
+    --color-background: #0a0a0a;
+    --color-foreground: #fafafa;
+    --color-card: #171717;
+    --color-card-foreground: #fafafa;
+    --color-muted: #262626;
+    --color-muted-foreground: #a3a3a3;
+    --color-border: #262626;
+    --color-input: #262626;
+    --color-accent: #052e16;
+    --color-accent-foreground: #bbf7d0;
+    --color-secondary: #262626;
+    --color-secondary-foreground: #fafafa;
+    --color-destructive: #dc2626;
+    --color-destructive-foreground: #fafafa;
+    --color-primary: #16a34a;
+    --color-primary-foreground: #ffffff;
+    --color-ring: #16a34a;
+  }
 }

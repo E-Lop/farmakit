@@ -74,7 +74,14 @@ Il backend è interamente gestito da Supabase (Auth, PostgreSQL, Edge Functions,
 - RLS basata su `cabinet_members`
 - Vedi [SHARING_MODEL.md](SHARING_MODEL.md) per dettagli
 
-### 4. Sicurezza
+### 4. Tema (light/dark/system)
+- Gestito da `next-themes` con `ThemeProvider` in `App.tsx`
+- Variabili CSS definite in `index.css` (blocco `@theme` per light, `.dark` per dark)
+- Toggle in pagina Settings con selettore a 3 opzioni
+- `useThemeColor` hook aggiorna `<meta name="theme-color">` dinamicamente
+- I componenti shadcn/ui si adattano automaticamente tramite classi `dark:`
+
+### 5. Sicurezza
 - Autenticazione JWT tramite Supabase Auth
 - Row Level Security su tutte le tabelle
 - Nessun dato sensibile lato client
@@ -142,6 +149,7 @@ src/
 | @zxing vs QuaggaJS | Supporto più formati, community più attiva, TypeScript nativo |
 | idb-keyval vs Dexie | Semplicità per key-value, sufficiente per il nostro uso |
 | shadcn/ui vs MUI | Bundle size, customizzazione Tailwind, copy-paste ownership |
+| next-themes vs hook custom | Gestisce flash/FOUC, SSR-safe, già installato, zero-config con shadcn |
 | Vite vs Next.js | SPA pura, no SSR necessario, build veloce |
 | Netlify vs Vercel | Supporto monorepo, redirect SPA semplici, pricing gratuito generoso |
 

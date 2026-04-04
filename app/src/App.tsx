@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -19,6 +20,7 @@ import { UpdateBanner } from "@/components/pwa/UpdateBanner";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { OfflineBanner } from "@/components/pwa/OfflineBanner";
 import { SyncInitializer } from "@/components/pwa/RealtimeSyncProvider";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,14 +42,21 @@ registerMutationDefaults(queryClient);
 const persister = createIDBPersister();
 const PERSIST_MAX_AGE = 1000 * 60 * 60 * 24; // 24h
 
+function ThemeColorUpdater() {
+  useThemeColor();
+  return null;
+}
+
 export function App() {
   return (
+    <ThemeProvider attribute="class" defaultTheme="system" storageKey="farmakit-theme">
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={{ persister, maxAge: PERSIST_MAX_AGE }}
     >
       <BrowserRouter>
         <AuthProvider>
+          <ThemeColorUpdater />
           <SyncInitializer />
           <UpdateBanner />
           <OfflineBanner />
@@ -74,5 +83,6 @@ export function App() {
       <InstallPrompt />
       <Toaster />
     </PersistQueryClientProvider>
+    </ThemeProvider>
   );
 }

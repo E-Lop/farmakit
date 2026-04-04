@@ -11,6 +11,7 @@
 - **Condivisione selettiva** — condividi singoli armadietti con familiari o coinquilini
 - **Notifiche scadenza** — ricevi avvisi prima che i farmaci scadano
 - **Offline-first** — funziona senza connessione, sincronizza quando torni online
+- **Tema scuro** — supporto light/dark/system con rilevamento automatico preferenze OS
 
 ## Stack tecnologico
 

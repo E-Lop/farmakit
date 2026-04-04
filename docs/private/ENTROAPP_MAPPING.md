@@ -59,7 +59,7 @@ EntroApp è un progetto con stack analogo (React 19, Supabase, Tailwind, shadcn/
 
 | Funzionalità | File EntroApp | Adattamento Farmakit |
 |---|---|---|
-| Dark theme | `src/hooks/useTheme.ts` | Copia diretta — light/dark/system, localStorage, matchMedia listener |
+| Dark theme | `src/hooks/useTheme.ts` | ✅ Implementato con `next-themes` (più robusto del hook custom). File: `app/src/hooks/useThemeColor.ts`, variabili in `app/src/index.css`, toggle in `app/src/pages/Settings.tsx` |
 | Onboarding guida | `src/pages/GuidaPage.tsx` | Struttura riutilizzabile, riscrivere contenuti per farmaci |
 | Instruction card primo uso | `src/components/foods/InstructionCard.tsx` | Adattare per "primo farmaco" |
 | Data export (GDPR) | `src/lib/dataExport.ts` | Adattare struttura: profilo + farmaci + armadietti (no immagini) |

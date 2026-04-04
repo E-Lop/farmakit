@@ -127,6 +127,31 @@ Avviso per farmaci in scadenza entro N giorni (default 30).
 - Push: Edge Function schedulata (pg_cron o esterno)
 - Ogni farmaco ha `notify_before_days` personalizzabile
 
+## F8 — Contribuzioni community (vedi sotto)
+
+## F9 — Tema scuro
+
+### Descrizione
+L'utente può scegliere tra tema chiaro, scuro o automatico (segue preferenze OS).
+
+### Flusso
+1. L'utente apre Settings
+2. Nella sezione "Aspetto" seleziona Sistema / Chiaro / Scuro
+3. Il tema si applica immediatamente
+4. La preferenza persiste in `localStorage` (chiave `farmakit-theme`)
+
+### Implementazione
+- `next-themes` ThemeProvider in `App.tsx` con `attribute="class"`
+- Variabili CSS dark in `index.css` (palette Neutral Dark)
+- Hook `useThemeColor` aggiorna `<meta name="theme-color">`
+- I componenti shadcn/ui si adattano automaticamente
+
+### Palette dark
+- Background: #0a0a0a, Card: #171717, Border: #262626
+- Primary: #16a34a (invariato), Accent: #052e16
+
+---
+
 ## F8 — Contribuzioni community
 
 ### Descrizione
