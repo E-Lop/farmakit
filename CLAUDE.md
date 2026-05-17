@@ -42,6 +42,19 @@ Farmakit è una PWA mobile-first per gestire l'inventario farmaci domestici (sca
 - Accesso dati basato su `cabinet_members` (condivisione selettiva)
 - Tabelle principali: `medicines`, `cabinets`, `cabinet_members`, `user_medicines`, `community_contributions`
 
+### Convenzione GRANT (Data API)
+Dalla migration `00006` il progetto ha optato per il nuovo default Supabase ([discussione #45329](https://github.com/orgs/supabase/discussions/45329)): le tabelle in `public` **non** sono esposte al Data API senza `GRANT` espliciti.
+
+Ogni nuova migration che crea tabelle in `public` deve includere, nello stesso file e in quest'ordine:
+1. `create table public.<name> (...);`
+2. `grant ... on public.<name> to <ruoli>;` — solo i privilegi minimi necessari (evitare `all`), distinguendo `anon` / `authenticated` / `service_role`
+3. `alter table public.<name> enable row level security;`
+4. `create policy ...;`
+
+Se la tabella è interna e va usata solo da Edge Function, omettere il grant ad `anon`/`authenticated` e mantenere solo `service_role` (oppure nessun grant e accesso col solo ruolo `postgres`/SR bypass).
+
+Template canonico e pattern per i 3 casi tipici: `docs/private/supabase-grants-convention.md`.
+
 ## Deploy
 - **Hosting**: Netlify (sito: `farmakit-app`)
 - **URL produzione**: https://farmakit.it (dominio custom, DNS su Aruba)
